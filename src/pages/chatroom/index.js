@@ -17,21 +17,30 @@ class Chatroom extends Component{
       course: null
     }
 
-    socket.on('server-message', ({ name, text }) => {
+    socket.on('server-message', ({ userInfo }) => {
+      const { firstName, lastName, text } = JSON.parse(userInfo);
       console.log(text)
       const { messages } = this.state;
-      messages.push(<MessageModal name={ name } message={ text }/>);
+      messages.push(<MessageModal name={ `${firstName} ${lastName}` } message={ text }/>);
       this.setState({ messages });
     });
   }
 
-  componentDidMount(){
+  async componentDidMount(){
     const { socket } = this.props;
     const course = sessionStorage.getItem('course');
     const language = sessionStorage.getItem('language') || 'english';
     socket.emit('client-join_Chat', { course, language });
     this.setState({ course });
-    //load messages from db 
+    const data = await API.getRoomMessages(course);
+    const messages = [];
+    data.forEach(message => {
+      const { userInfo, content } = message;
+      const { firstName, lastName } = JSON.parse(userInfo);
+      messages.push(<MessageModal name={`${firstName} ${lastName}`} message={ content }/>);
+    });
+    
+    this.setState({ messages });
   }
 
   handleClick = async () => {

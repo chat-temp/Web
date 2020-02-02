@@ -2,8 +2,14 @@ import axios from 'axios';
 const SERVER_URL = 'http://localhost:3002'
 const api = axios.create({ baseURL: SERVER_URL });
 
-const getRoomMessages = () => {
-  //make api call to messages
+const getRoomMessages = async (room) => {
+  try{
+    const res = await api.get(`/messages/getRoomMessagesForUser?roomInfo=${room}`);
+    console.log(res);
+    return res.data
+  } catch(e) {
+    console.log(e)
+  }
 }
 
 const getUserRooms = () => {
@@ -46,7 +52,7 @@ const getUser = async (email) => {
 
 const createMessage = async (data) => {
   try{
-    await api.post('/messages', data);
+    await api.post('/messages/createMessage', data);
   } catch(e) {
     console.log(e);
   }
